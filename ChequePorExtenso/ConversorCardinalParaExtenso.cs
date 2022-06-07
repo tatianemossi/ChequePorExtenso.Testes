@@ -9,71 +9,112 @@ namespace ChequePorExtenso
 
         public ConversorCardinalParaExtenso()
         {
-            _dicionarioNumeros = new Dictionary<int, string>
-            {
-                [1] = "um",
-                [2] = "dois",
-                [3] = "três",
-                [4] = "quatro",
-                [5] = "cinco",
-                [6] = "seis",
-                [7] = "sete",
-                [8] = "oito",
-                [9] = "nove",
-                [10] = "dez",
-                [11] = "onze",
-                [12] = "doze",
-                [13] = "treze",
-                [14] = "quatorze",
-                [15] = "quinze",
-                [16] = "dezesseis",
-                [17] = "dezessete",
-                [18] = "dezoito",
-                [19] = "dezenove",
-                [20] = "vinte",
-                [30] = "trinta",
-                [40] = "quarenta",
-                [50] = "cinquenta",
-                [60] = "sessenta",
-                [70] = "setenta",
-                [80] = "oitenta",
-                [90] = "noventa",
-                [100] = "cem",
-                [200] = "duzentos",
-                [300] = "trezentos",
-                [400] = "quatrocentos",
-                [500] = "quinhentos",
-                [600] = "seiscentos",
-                [700] = "setecentos",
-                [800] = "oitocentos",
-                [900] = "novecentos",
-                [1000] = "mil",
-                [2000] = "dois mil",
-                [3000] = "três mil",
-                [4000] = "quatro mil",
-                [5000] = "cinco mil",
-                [6000] = "seis mil",
-                [7000] = "sete mil",
-                [8000] = "oito mil",
-                [9000] = "nove mil",
-                [10000] = "dez mil",
-                [100000] = "cem mil",
-                [1000000] = "1 milhão",
-                [1000000000] = "1 bilhão"
-            };
+            _dicionarioNumeros = DicionarioNumeros.CarregarDicionario();
         }
 
         public string ConverterNumeroCardinalParaExtenso(int numeroCardinal)
         {
-            if (numeroCardinal == 1)
-                return $"{_dicionarioNumeros[numeroCardinal]} real";
+            var tamanhoNumero = numeroCardinal.ToString().Length;
+            var numeroExtenso = "";
 
-            else if(numeroCardinal == 1000000 || numeroCardinal == 1000000000)
-                return $"{_dicionarioNumeros[numeroCardinal]} de reais";
+            switch (tamanhoNumero)
+            {
+                case 1:
+                    numeroExtenso = ConverterUnidadesParaExtenso(numeroCardinal);
+                    break;
+                case 2:
+                    numeroExtenso = ConverterDezenasParaExtenso(numeroCardinal);
+                    break;
+                case 3:
+                    numeroExtenso = ConverterCentenasParaExtenso(numeroCardinal);
+                    break;
+                case 4:
+                    numeroExtenso = ConverterMilharesParaExtenso(numeroCardinal);
+                    break;
+
+                default:
+                    break;
+            };
+
+            if (numeroCardinal == 1)
+                return $"{numeroExtenso} real";
+            else
+                return $"{numeroExtenso} reais";
+        }
+
+        public string ConverterUnidadesParaExtenso(int numeroCardinal)
+        {
+            return _dicionarioNumeros[numeroCardinal];
+        }
+
+        public string ConverterDezenasParaExtenso(int numeroCardinal)
+        {
+            if (numeroCardinal > 19)
+            {
+                var dezena = numeroCardinal.ToString().ToCharArray()[0];
+                var unidade = numeroCardinal.ToString().ToCharArray()[1];
+
+                int chaveNumero = Convert.ToInt32($"{dezena}0");
+
+                if (unidade == '0')
+                    return _dicionarioNumeros[chaveNumero];
+                else
+                {
+                    var unidadeExtenso = ConverterUnidadesParaExtenso(Convert.ToInt32(unidade.ToString()));
+                    return $"{_dicionarioNumeros[chaveNumero]} e {unidadeExtenso}";
+                }
+            }
+            else
+                return $"{_dicionarioNumeros[numeroCardinal]}";
+        }
+
+        public string ConverterCentenasParaExtenso(int numeroCardinal)
+        {
+            if (numeroCardinal == 100)
+                return "cem";
 
             else
-                return $"{_dicionarioNumeros[numeroCardinal]} reais";
+            {
+                var centena = numeroCardinal.ToString().ToCharArray()[0];
+                var dezena = numeroCardinal.ToString().ToCharArray()[1];
+                var unidade = numeroCardinal.ToString().ToCharArray()[2];
 
+                int chaveNumero = Convert.ToInt32($"{centena}00");
+
+                if (dezena == '0' && unidade == '0')
+                    return _dicionarioNumeros[chaveNumero];
+
+                else if (dezena == '0')
+                {
+                    var unidadeExtenso = ConverterUnidadesParaExtenso(Convert.ToInt32(unidade.ToString()));
+                    return $"{_dicionarioNumeros[chaveNumero]} e {unidadeExtenso}";
+                }
+
+                var dezenaExtenso = ConverterDezenasParaExtenso(Convert.ToInt32($"{dezena}{unidade}"));
+                return $"{_dicionarioNumeros[chaveNumero]} e {dezenaExtenso}";
+            }
+        }
+
+        public string ConverterMilharesParaExtenso(int numeroCardinal)
+        {
+            var milhar = numeroCardinal.ToString().ToCharArray()[0];
+            var centena = numeroCardinal.ToString().ToCharArray()[1];
+            var dezena = numeroCardinal.ToString().ToCharArray()[2];
+            var unidade = numeroCardinal.ToString().ToCharArray()[3];
+
+            int chaveNumero = Convert.ToInt32($"{milhar}000");
+
+            if (centena == '0' && dezena == '0' && unidade == '0')
+                return _dicionarioNumeros[chaveNumero];
+
+            else if (centena == '0')
+            {
+                var dezenaExtenso = ConverterDezenasParaExtenso(Convert.ToInt32($"{dezena}{unidade}"));
+                return $"{_dicionarioNumeros[chaveNumero]} e {dezenaExtenso}";
+            }
+
+            var centenaExtenso = ConverterCentenasParaExtenso(Convert.ToInt32($"{centena}{dezena}{unidade}"));
+            return $"{_dicionarioNumeros[chaveNumero]} {centenaExtenso}";
         }
     }
 }
